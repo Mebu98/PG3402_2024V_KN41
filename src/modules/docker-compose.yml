@@ -1,0 +1,123 @@
+name: math-game
+version: "0.1"
+
+services:
+  consul:
+    image: hashicorp/consul:1.17.3
+    container_name: consul-1-17-3
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+    networks:
+      - "spring"
+  
+  consul-importer:
+    image: consul-importer:latest
+    build:
+      context: consul-importer
+      dockerfile: Dockerfile
+    depends_on:
+      - "consul"
+    networks:
+      - "spring"
+      
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - "spring"
+  
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+    networks:
+      - "spring"
+
+  service-multiplication:
+    container_name: service-multiplication
+    build:
+      context: service-multiplication
+      dockerfile: Dockerfile
+    image: service-multiplication:latest
+    depends_on: 
+      consul:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+      zipkin:
+        condition: service_started
+    ports:
+      - "0:8080"
+    networks:
+      - "spring"
+    environment:
+      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT:  http://zipkin:9411/api/v2/spans
+
+  service-division:
+    container_name: service-division
+    build:
+      context: service-division
+      dockerfile: Dockerfile
+    image: service-division:latest
+    depends_on:
+      consul:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+      zipkin:
+        condition: service_started
+    ports:
+      - "0:8080"
+    networks:
+      - "spring"
+    environment:
+      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT:  http://zipkin:9411/api/v2/spans
+
+  logs:
+    container_name: logs
+    build:
+      context: logs
+      dockerfile: Dockerfile
+    image: logs:latest
+    depends_on:
+      consul:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+      zipkin:
+        condition: service_started
+    ports:
+      - "0:8080"
+    networks:
+      - "spring"
+    environment:
+      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT:  http://zipkin:9411/api/v2/spans
+
+  gateway:
+    container_name: gateway
+    build:
+      context: gateway
+      dockerfile: Dockerfile
+    image: gateway:latest
+    depends_on:
+      consul:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+      zipkin:
+        condition: service_started
+    ports:
+      - "8080:8080"
+    networks:
+      - "spring"
+    environment:
+      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT:  http://zipkin:9411/api/v2/spans
+
+networks:
+  spring:
+    driver: bridge
