@@ -21,13 +21,14 @@ public class MultiplicationService {
     private final MultiplicationChallengeRepo repo;
     private final Random random = new Random();
 
-    public MultiplicationChallenge generateChallenge(int difficulty){
+    public MultiplicationChallenge generateChallenge(String userName, int difficulty){
 
         int num1 = generateRandomInt(difficulty);
         int num2 = generateRandomInt(difficulty);
         Long correctAnswer = ((long) num1) * ((long) num2);
 
         MultiplicationChallenge challenge = MultiplicationChallenge.builder()
+                .userName(userName)
                 .difficulty(difficulty)
                 .num1(num1)
                 .num2(num2)

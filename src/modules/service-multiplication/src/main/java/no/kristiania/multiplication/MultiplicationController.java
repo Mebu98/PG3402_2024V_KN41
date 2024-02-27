@@ -40,13 +40,13 @@ public class MultiplicationController {
         log.info("I will send REST message");
         String test = restTemplate.getForObject("http://division", String.class);
 
-        return "Hello multiplication service " + test + multiplicationService.generateChallenge(1);
+        return "Hello multiplication service " + test + multiplicationService.generateChallenge("test", 1);
     }
 
-    @GetMapping("/generate")
-    public DtoMultiplicationChallenge getChallenge(@Valid @RequestBody @NonNull DtoMultiplicationChallenge dtoChallenge){
+    @GetMapping("/generate/username/{userName}/difficulty/{difficulty}")
+    public DtoMultiplicationChallenge getChallenge(@PathVariable String userName, @PathVariable int difficulty){
 
-        MultiplicationChallenge createdChallenge = multiplicationService.generateChallenge(dtoChallenge.getDifficulty());
+        MultiplicationChallenge createdChallenge = multiplicationService.generateChallenge(userName, difficulty);
 
         return DtoMultiplicationChallenge.builder()
                 .id(createdChallenge.getId())
