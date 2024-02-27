@@ -1,36 +1,32 @@
-package no.mebu.multiplication;
+package no.kristiania.division;
 
+import io.micrometer.tracing.annotation.ContinueSpan;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 @RestController
 @AllArgsConstructor
-public class MultiplicationController {
+public class DivisionController {
 
-    private RestTemplate restTemplate;
-    private RabbitTemplate rabbitTemplate;
+    private final AmqpTemplate amqpTemplate;
 
     @RabbitListener(queues = "queue.multiplication")
     @RabbitHandler
     public void test(final String test) {
         System.out.println(test);
+        log.info("Rabbit message received");
     }
 
+    @ContinueSpan
     @GetMapping("/")
     public String helloWorld() {
-        log.info("I will send rabbit message");
-        rabbitTemplate.convertAndSend("exchange.multiplication", "key", "asd");
-
-        log.info("I will send REST message");
-        String test = restTemplate.getForObject("http://division", String.class);
-        return "Hello multiplication service " + test;
+        log.info("REST message received");
+        return "Hello division service";
     }
-
 }

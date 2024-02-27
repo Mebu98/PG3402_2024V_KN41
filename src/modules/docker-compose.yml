@@ -56,7 +56,8 @@ services:
     networks:
       - "spring"
     environment:
-      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT:  http://zipkin:9411/api/v2/spans
+      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT: http://zipkin:9411/api/v2/spans
+      SPRING_DATASOURCE_URL: jdbc:h2:tcp://h2-database:1521/home/h2-data/multiplication
 
   service-division:
     container_name: service-division
@@ -77,6 +78,7 @@ services:
       - "spring"
     environment:
       MANAGEMENT.ZIPKIN.TRACING.ENDPOINT:  http://zipkin:9411/api/v2/spans
+      SPRING_DATASOURCE_URL: jdbc:h2:tcp://h2-database:1521/home/h2-data/division
 
   logs:
     container_name: logs
@@ -97,6 +99,18 @@ services:
       - "spring"
     environment:
       MANAGEMENT.ZIPKIN.TRACING.ENDPOINT:  http://zipkin:9411/api/v2/spans
+
+  h2-database:
+    container_name: h2-database
+    build:
+      context: h2
+      dockerfile: Dockerfile
+    image: h2:latest
+    ports:
+      - '81:81'
+      - '1521:1521'
+    networks:
+      - "spring"
 
   gateway:
     container_name: gateway

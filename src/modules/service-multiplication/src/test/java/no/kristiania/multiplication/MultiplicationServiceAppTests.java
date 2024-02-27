@@ -1,4 +1,4 @@
-package no.mebu.multiplication;
+package no.kristiania.multiplication;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

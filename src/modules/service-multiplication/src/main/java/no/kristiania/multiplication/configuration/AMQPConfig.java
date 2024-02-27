@@ -1,4 +1,4 @@
-package no.mebu.multiplication.configuration;
+package no.kristiania.multiplication.configuration;
 
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;

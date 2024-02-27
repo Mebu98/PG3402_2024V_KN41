@@ -4,6 +4,16 @@ server:
 spring:
   application:
     name: multiplication
+  h2:
+    console:
+      enabled: true
+  datasource:
+    url: jdbc:h2:tcp://h2-database:1521/home/h2-data/multiplication
+    username: sa
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
 
 logging:
   pattern:
