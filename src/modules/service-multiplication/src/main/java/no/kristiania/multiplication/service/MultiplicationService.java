@@ -3,6 +3,7 @@ package no.kristiania.multiplication.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.kristiania.multiplication.DTO.DtoMultiplicationChallenge;
+import no.kristiania.multiplication.SubmitEnum;
 import no.kristiania.multiplication.models.MultiplicationChallenge;
 import no.kristiania.multiplication.models.ShortMultiplicationChallenge;
 import no.kristiania.multiplication.repository.MultiplicationChallengeRepo;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
@@ -54,21 +56,27 @@ public class MultiplicationService {
                 .build();
     }
 
-    public boolean checkCorrect(DtoMultiplicationChallenge dtoChallenge){
+    public SubmitEnum submit(DtoMultiplicationChallenge dtoChallenge){
+        SubmitEnum submitEnum = SubmitEnum.INCORRECT;
         boolean correct = false;
         Timestamp endTime = Timestamp.from(Instant.now());
 
         Optional<MultiplicationChallenge> internalChallenge = repo.findById(dtoChallenge.getId());
+        // This will ideally never happen
         if(internalChallenge.isEmpty()){
-            return false;
+            return SubmitEnum.NOT_FOUND;
+        }
+
+        // To prevent double submissions
+        if(internalChallenge.get().getEndTime() != null){
+            return SubmitEnum.ALREADY_SUBMITTED;
         }
 
         if(Objects.equals(dtoChallenge.getUserAnswer(), internalChallenge.get().getCorrectAnswer())){
+            submitEnum = SubmitEnum.CORRECT;
             correct = true;
         }
 
-        dtoChallenge.setCorrect(correct);
-        dtoChallenge.setEndTime(endTime);
 
         repo.updateUserAnswerAndCorrectAndEndTimeById(
                 dtoChallenge.getUserAnswer(),
@@ -76,11 +84,19 @@ public class MultiplicationService {
                 endTime,
                 dtoChallenge.getId());
 
-        return correct;
+        return submitEnum;
     }
 
     // Generate a random number between 2 and 10^difficulty
     private int generateRandomInt(int difficulty) {
         return random.nextInt(2, (int) Math.pow(10, difficulty));
+    }
+
+    public ArrayList<MultiplicationChallenge> getAllChallenges() {
+        return (ArrayList<MultiplicationChallenge>) repo.findAll();
+    }
+
+    public ArrayList<MultiplicationChallenge> getAllByUserName(String username) {
+        return repo.findAllByUserName(username);
     }
 }

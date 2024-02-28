@@ -17,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @EnableAutoConfiguration
 @DataJpaTest
@@ -51,14 +52,39 @@ public class MultiplicationRepoTest {
         MultiplicationChallenge challenge2 = MultiplicationChallenge.builder()
                 .userName(challenge.getUserName())
                 .build();
-        challenge2.setDifficulty(2);
+
+        MultiplicationChallenge challenge3diffUsername = MultiplicationChallenge.builder()
+                .userName("other username")
+                .build();
+
+        repo.save(challenge);
+        repo.save(challenge2);
+        repo.save(challenge3diffUsername);
+
+        ArrayList<MultiplicationChallenge> repoMultiplicationChallenges = repo.findAllByUserName(challenge.getUserName());
+
+        assertTrue(repoMultiplicationChallenges.contains(challenge));
+        assertTrue(repoMultiplicationChallenges.contains(challenge2));
+
+        // Assert that all challenges have the same username
+        repoMultiplicationChallenges.forEach(internalChallenge -> {
+            assertEquals(challenge.getUserName(), internalChallenge.getUserName());
+        });
+    }
+
+    @Test
+    public void testGetAll(){
+        MultiplicationChallenge challenge2 = MultiplicationChallenge.builder()
+                .userName("Other user")
+                .build();
 
         repo.save(challenge);
         repo.save(challenge2);
 
-        ArrayList<MultiplicationChallenge> multiplicationChallenges = repo.findAllByUserName(challenge.getUserName());
+        ArrayList<MultiplicationChallenge> repoMultiplicationChallenges = (ArrayList<MultiplicationChallenge>) repo.findAll();
 
-        assertEquals(2, multiplicationChallenges.toArray().length);
-
+        // Assert that both challenges are in the findAll arrayList
+        assertTrue(repoMultiplicationChallenges.contains(challenge));
+        assertTrue(repoMultiplicationChallenges.contains(challenge2));
     }
 }
