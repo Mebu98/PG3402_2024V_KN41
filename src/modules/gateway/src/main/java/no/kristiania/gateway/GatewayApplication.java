@@ -1,4 +1,4 @@
-package no.mebu.gateway;
+package no.kristiania.gateway;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.tracing.ConditionalOnEnabledTracing;

@@ -1,4 +1,4 @@
-package no.mebu.gateway;
+package no.kristiania.gateway;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

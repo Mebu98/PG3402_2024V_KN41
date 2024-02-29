@@ -5,6 +5,8 @@ import brave.http.HttpTracing;
 import brave.spring.web.TracingClientHttpRequestInterceptor;
 import org.springframework.amqp.rabbit.config.ContainerCustomizer;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +25,13 @@ public class DivisionConfig {
     public HttpTracing create(Tracing tracing) {
         return HttpTracing.newBuilder(tracing).build();
     }
-    
+
+    @Bean
+    MessageConverter messageConverter()
+    {
+        return new Jackson2JsonMessageConverter();
+    }
+
     @LoadBalanced
     @Bean
     public RestTemplate restTemplate(HttpTracing httpTracing) {

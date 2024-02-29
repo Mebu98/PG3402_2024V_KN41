@@ -17,11 +17,11 @@ spring:
         - id: multiplication
           uri: lb://multiplication/
           predicates:
-            - Path=/**
+            - Path=/multiplication/**
         - id: division
           uri: lb://division/
           predicates:
-            - Path=/**
+            - Path=/division/**
       globalcors:
         cors-configurations:
           '[/**]':

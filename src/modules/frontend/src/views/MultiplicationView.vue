@@ -43,7 +43,7 @@ let rules = {
         <v-text-field v-model="userAnswer" label="Your Answer"></v-text-field>
         <v-btn type="submit">Submit Answer</v-btn>
       </v-form>
-      <div v-if="submitResponse">
+      <div v-if="submitResponse.value && challenge.value">
         <p>response: {{challenge.value.num1}} X {{challenge.value.num2}} = {{userAnswer}}</p>
         <p>{{submitResponse.value}}</p>
       </div>

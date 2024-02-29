@@ -11,18 +11,8 @@ import org.springframework.context.annotation.Configuration;
 public class AMQPConfig {
 
     @Bean
-    public TopicExchange multiplicationTopicExchange(@Value("exchange.multiplication") final String exchangeName) {
-        return ExchangeBuilder.topicExchange("exchange.multiplication").durable(true).build();
-    }
-
-    @Bean
-    public Queue multiplicationQueue(@Value("queue.multiplication") final String queueName) {
-        return QueueBuilder.durable("queue.multiplication").build();
-    }
-
-    @Bean
-    public Binding multiplicationBinding(final Queue multiplicationQueue, TopicExchange multiplicationTopicExchange) {
-        return BindingBuilder.bind(multiplicationQueue).to(multiplicationTopicExchange).with("key");
+    public TopicExchange analyticsTopicExchange(@Value("exchange.analytics") final String exchangeName) {
+        return ExchangeBuilder.topicExchange(exchangeName).durable(true).build();
     }
 
 }

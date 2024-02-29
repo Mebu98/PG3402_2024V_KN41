@@ -10,7 +10,7 @@
         <relativePath/>
     </parent>
 
-    <groupId>no.mebu</groupId>
+    <groupId>no.kristiania</groupId>
     <artifactId>service-division</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>service-division</name>

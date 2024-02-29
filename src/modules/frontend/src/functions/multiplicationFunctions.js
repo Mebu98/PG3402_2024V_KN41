@@ -1,5 +1,5 @@
 export async function generateMultiplicationChallenge(userName, difficulty, challenge){
-    await fetch(`http://localhost:8080/api/v1/multiplication/generate/username/${userName}/difficulty/${difficulty}`,
+    await fetch(`http://localhost:8080/multiplication/api/v1/generate/username/${userName}/difficulty/${difficulty}`,
         {
             method: 'GET'
         }
@@ -11,7 +11,7 @@ export async function generateMultiplicationChallenge(userName, difficulty, chal
 export async function submitMultiplicationChallenge(challenge, userAnswer, submitResponse){
     challenge.userAnswer = userAnswer;
 
-    await fetch(`http://localhost:8080/api/v1/multiplication/submit`,
+    await fetch(`http://localhost:8080/multiplication/api/v1/submit`,
         {
             method: 'POST',
             headers: {

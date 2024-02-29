@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.kristiania.multiplication.DTO.DtoMultiplicationChallenge;
 import no.kristiania.multiplication.SubmitEnum;
+import no.kristiania.multiplication.eventPublisher.ChallengeEventPublisher;
 import no.kristiania.multiplication.models.MultiplicationChallenge;
 import no.kristiania.multiplication.models.ShortMultiplicationChallenge;
 import no.kristiania.multiplication.repository.MultiplicationChallengeRepo;
@@ -22,8 +23,11 @@ import java.util.Random;
 public class MultiplicationService {
     private final MultiplicationChallengeRepo repo;
     private final Random random = new Random();
+    private final ChallengeEventPublisher challengeEventPublisher;
 
     public MultiplicationChallenge generateChallenge(String userName, int difficulty){
+
+        log.info("[MultiplicationService] Generating multiplicationChallenge for user " + userName + " with difficulty " + difficulty + ".");
 
         int num1 = generateRandomInt(difficulty);
         int num2 = generateRandomInt(difficulty);
@@ -38,16 +42,30 @@ public class MultiplicationService {
                 .startTime(Timestamp.from(Instant.now()))
                 .build();
 
+        log.info("[MultiplicationService] Saving multiplicationChallenge with num1="
+                + challenge.getNum1() + ", num2=" + challenge.getNum2()
+                + " and correctAnswer=" + challenge.getCorrectAnswer() +" to database.");
         repo.save(challenge);
+
+        log.info("[MultiplicationService] Challenge saved to database, returning challenge to user.");
+
+        challengeEventPublisher.challengeCreated(challenge.getId());
 
         return challenge;
     }
 
     public ShortMultiplicationChallenge generateShortChallenge(int difficulty){
+        log.info("[MultiplicationService] Got a request for a shortMultiplicationChallenge with difficulty= " + difficulty + ".");
 
         int num1 = generateRandomInt(difficulty);
         int num2 = generateRandomInt(difficulty);
         Long correctAnswer = ((long) num1) * ((long) num2);
+
+        log.info("[MultiplicationService] Generated shortMultiplicationChallenge with num1="
+                + num1 + ", num2=" + num2
+                + " and correctAnswer=" + correctAnswer +".");
+
+        log.info("[MultiplicationService] Returning shortMultiplicationChallenge.");
 
         return ShortMultiplicationChallenge.builder()
                 .num1(num1)
@@ -64,11 +82,13 @@ public class MultiplicationService {
         Optional<MultiplicationChallenge> internalChallenge = repo.findById(dtoChallenge.getId());
         // This will ideally never happen
         if(internalChallenge.isEmpty()){
+            log.info("[MultiplicationService] Submit function: Challenge with id " + dtoChallenge.getId() + " not found in database.");
             return SubmitEnum.NOT_FOUND;
         }
 
         // To prevent double submissions
         if(internalChallenge.get().getEndTime() != null){
+            log.info("[MultiplicationService] Submit function: Challenge with id " + dtoChallenge.getId() + " has already been submitted.");
             return SubmitEnum.ALREADY_SUBMITTED;
         }
 
@@ -77,6 +97,8 @@ public class MultiplicationService {
             correct = true;
         }
 
+        log.info(String.format("[MultiplicationService] Submit function: Updating challenge database with id=%d with userAnswer=%d, correctAnswer=%d, correct=%b and endTime=%s.",
+                dtoChallenge.getId(), dtoChallenge.getUserAnswer(), internalChallenge.get().getCorrectAnswer(), correct, endTime));
 
         repo.updateUserAnswerAndCorrectAndEndTimeById(
                 dtoChallenge.getUserAnswer(),
