@@ -1,7 +1,7 @@
 <script setup>
 
 import {getChallengesCount} from "@/functions/analyticsFunctions.js";
-import {computed, reactive, ref} from "vue";
+import {reactive, ref} from "vue";
 
 let count = reactive({
   value: 0
@@ -16,6 +16,7 @@ getChallengesCount(count);
     <v-main
         style="display: flex; place-items: center; place-content: center; flex-direction: column">
       <header>
+        <router-link to="/">Home</router-link>
         <h1>Math Challenges</h1>
       </header>
       <RouterView/>

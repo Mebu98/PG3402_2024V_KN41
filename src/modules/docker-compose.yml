@@ -3,27 +3,31 @@ version: "0.1"
 
 services:
   frontend:
+    container_name: frontend
     build:
       context: frontend
       dockerfile: Dockerfile
+    image: frontend:latest
     ports:
       - "3000:3000"
+
+  consul-importer:
+    container_name: consul-importer
+    build:
+      context: consul-importer
+      dockerfile: Dockerfile
+    image: consul-importer:latest
+    depends_on:
+      - consul
+    networks:
+      - "spring"
+
   consul:
     image: hashicorp/consul:1.17.3
     container_name: consul-1-17-3
     ports:
       - "8500:8500"
       - "8600:8600/udp"
-    networks:
-      - "spring"
-  
-  consul-importer:
-    image: consul-importer:latest
-    build:
-      context: consul-importer
-      dockerfile: Dockerfile
-    depends_on:
-      - "consul"
     networks:
       - "spring"
       
@@ -43,89 +47,6 @@ services:
       - "9411:9411"
     networks:
       - "spring"
-
-  service-multiplication:
-    container_name: service-multiplication
-    build:
-      context: service-multiplication
-      dockerfile: Dockerfile
-    image: service-multiplication:latest
-    depends_on: 
-      consul:
-        condition: service_started
-      rabbitmq:
-        condition: service_started
-      zipkin:
-        condition: service_started
-    ports:
-      - "0:8080"
-    networks:
-      - "spring"
-    environment:
-      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT: http://zipkin:9411/api/v2/spans
-      SPRING_DATASOURCE_URL: jdbc:h2:tcp://h2-database:1521/home/h2-data/multiplication
-
-  service-division:
-    container_name: service-division
-    build:
-      context: service-division
-      dockerfile: Dockerfile
-    image: service-division:latest
-    depends_on:
-      consul:
-        condition: service_started
-      rabbitmq:
-        condition: service_started
-      zipkin:
-        condition: service_started
-    ports:
-      - "0:8080"
-    networks:
-      - "spring"
-    environment:
-      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT:  http://zipkin:9411/api/v2/spans
-      SPRING_DATASOURCE_URL: jdbc:h2:tcp://h2-database:1521/home/h2-data/division
-
-  service-analytics:
-      container_name: service-analytics
-      build:
-        context: service-analytics
-        dockerfile: Dockerfile
-      image: service-analytics:latest
-      depends_on:
-        consul:
-          condition: service_started
-        rabbitmq:
-          condition: service_started
-        zipkin:
-          condition: service_started
-      ports:
-        - "0:8080"
-      networks:
-        - "spring"
-      environment:
-        MANAGEMENT.ZIPKIN.TRACING.ENDPOINT:  http://zipkin:9411/api/v2/spans
-        SPRING_DATASOURCE_URL: jdbc:h2:tcp://h2-database:1521/home/h2-data/analytics
-
-  logs:
-    container_name: logs
-    build:
-      context: logs
-      dockerfile: Dockerfile
-    image: logs:latest
-    depends_on:
-      consul:
-        condition: service_started
-      rabbitmq:
-        condition: service_started
-      zipkin:
-        condition: service_started
-    ports:
-      - "0:8080"
-    networks:
-      - "spring"
-    environment:
-      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT:  http://zipkin:9411/api/v2/spans
 
   h2-database:
     container_name: h2-database
@@ -158,6 +79,95 @@ services:
       - "spring"
     environment:
       MANAGEMENT.ZIPKIN.TRACING.ENDPOINT:  http://zipkin:9411/api/v2/spans
+
+  logs:
+    container_name: logs
+    build:
+      context: logs
+      dockerfile: Dockerfile
+    image: logs:latest
+    depends_on:
+      consul:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+      zipkin:
+        condition: service_started
+    ports:
+      - "0:8080"
+    networks:
+      - "spring"
+    environment:
+      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT: http://zipkin:9411/api/v2/spans
+
+  service-multiplication:
+    container_name: service-multiplication
+    build:
+      context: service-multiplication
+      dockerfile: Dockerfile
+    image: service-multiplication:latest
+    depends_on: 
+      consul:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+      zipkin:
+        condition: service_started
+      h2-database:
+        condition: service_started
+    ports:
+      - "0:8080"
+    networks:
+      - "spring"
+    environment:
+      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT: http://zipkin:9411/api/v2/spans
+      SPRING_DATASOURCE_URL: jdbc:h2:tcp://h2-database:1521/home/h2-data/multiplication
+
+  service-division:
+    container_name: service-division
+    build:
+      context: service-division
+      dockerfile: Dockerfile
+    image: service-division:latest
+    depends_on:
+      consul:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+      zipkin:
+        condition: service_started
+      h2-database:
+        condition: service_started
+    ports:
+      - "0:8080"
+    networks:
+      - "spring"
+    environment:
+      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT:  http://zipkin:9411/api/v2/spans
+      SPRING_DATASOURCE_URL: jdbc:h2:tcp://h2-database:1521/home/h2-data/division
+
+  service-analytics:
+      container_name: service-analytics
+      build:
+        context: service-analytics
+        dockerfile: Dockerfile
+      image: service-analytics:latest
+      depends_on:
+        consul:
+          condition: service_started
+        rabbitmq:
+          condition: service_started
+        zipkin:
+          condition: service_started
+        h2-database:
+          condition: service_started
+      ports:
+        - "0:8080"
+      networks:
+        - "spring"
+      environment:
+        MANAGEMENT.ZIPKIN.TRACING.ENDPOINT:  http://zipkin:9411/api/v2/spans
+        SPRING_DATASOURCE_URL: jdbc:h2:tcp://h2-database:1521/home/h2-data/analytics
 
 networks:
   spring:

@@ -1,4 +1,4 @@
-export async function getChallengesCount(count){
+export async function getChallengesCount(count) {
     await fetch(`http://localhost:8080/analytics/api/v1/challenges/count`,
         {
             method: 'GET'
