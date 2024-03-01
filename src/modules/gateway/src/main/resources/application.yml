@@ -22,6 +22,11 @@ spring:
           uri: lb://division/
           predicates:
             - Path=/division/**
+        - id: analytics
+          uri: lb://analytics/
+          predicates:
+            - Path=/analytics/**
+
       globalcors:
         cors-configurations:
           '[/**]':

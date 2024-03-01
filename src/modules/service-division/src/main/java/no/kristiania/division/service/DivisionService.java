@@ -6,6 +6,7 @@ import no.kristiania.division.DTO.DtoDivisionChallenge;
 import no.kristiania.division.DTO.DtoShortMultiplicationChallenge;
 import no.kristiania.division.DivisionChallenge;
 import no.kristiania.division.SubmitEnum;
+import no.kristiania.division.eventPublisher.ChallengeEventPublisher;
 import no.kristiania.division.repo.DivisionChallengeRepo;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -21,9 +22,10 @@ import java.util.Optional;
 @AllArgsConstructor
 @Slf4j
 public class DivisionService {
-    private final DivisionChallengeRepo repo;
 
+    private final DivisionChallengeRepo repo;
     private RestTemplate restTemplate;
+    private final ChallengeEventPublisher challengeEventPublisher;
 
     public DivisionChallenge generateChallenge(String userName, int difficulty){
 
@@ -63,6 +65,9 @@ public class DivisionService {
                 + " and correctAnswer=" + challenge.getCorrectAnswer() +" to database.");
 
         repo.save(challenge);
+
+        // Publish that we have created a new challenge to all interested parties
+        challengeEventPublisher.challengeCreated(challenge.getId());
 
         log.info("[DivisionService] Challenge saved to database, returning challenge to user.");
         return challenge;

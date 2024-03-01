@@ -86,6 +86,27 @@ services:
       MANAGEMENT.ZIPKIN.TRACING.ENDPOINT:  http://zipkin:9411/api/v2/spans
       SPRING_DATASOURCE_URL: jdbc:h2:tcp://h2-database:1521/home/h2-data/division
 
+  service-analytics:
+      container_name: service-analytics
+      build:
+        context: service-analytics
+        dockerfile: Dockerfile
+      image: service-analytics:latest
+      depends_on:
+        consul:
+          condition: service_started
+        rabbitmq:
+          condition: service_started
+        zipkin:
+          condition: service_started
+      ports:
+        - "0:8080"
+      networks:
+        - "spring"
+      environment:
+        MANAGEMENT.ZIPKIN.TRACING.ENDPOINT:  http://zipkin:9411/api/v2/spans
+        SPRING_DATASOURCE_URL: jdbc:h2:tcp://h2-database:1521/home/h2-data/analytics
+
   logs:
     container_name: logs
     build:

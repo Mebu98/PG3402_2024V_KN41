@@ -9,7 +9,7 @@
             <pattern>%d{HH:mm:ss.SSS} [%t] %logger{36} - %msg</pattern>
         </layout>
 
-        <applicationId>multiplication</applicationId>
+        <applicationId>analytics</applicationId>
         <host>${rabbitMQHost:-localhost}</host>
         <routingKeyPattern>%property{applicationId}.%p</routingKeyPattern>
         <exchangeName>logs.topic</exchangeName>
